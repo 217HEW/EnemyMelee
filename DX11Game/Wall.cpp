@@ -54,6 +54,7 @@ HRESULT InitWall(void)
 		//g_wall->m_pos = XMFLOAT3(0.0f, 50.0f, 150.0f);
 		g_wall[i].m_nLife = MAX_LIFE;
 		g_wall[i].use = false;
+
 	}
 
 	// モデルデータの読み込み
@@ -79,6 +80,7 @@ void UninitWall(void)
 //=============================================================================
 void UpdateWall(void)
 {
+
 
 	XMMATRIX mtxWorld, mtxRot, mtxTranslate;
 
@@ -116,7 +118,6 @@ void UpdateWall(void)
 		// 壁とプレイヤーが衝突していたら
 		if (CollisionWall(g_wall[i].m_pos, g_wall[i].m_size, GetPlayerPos(), GetPlayerSize()))
 		{
-
 			StartExplosion(g_wall[i].m_pos, XMFLOAT2(80.0f, 80.0f));
 			g_wall[i].m_nLife--;
 
@@ -126,8 +127,6 @@ void UpdateWall(void)
 			}
 		}
 	}
-
-
 }
 
 //=============================================================================
@@ -183,6 +182,21 @@ int SetWall(XMFLOAT3 pos)
 }
 
 // 壁位置取得
+XMFLOAT3 GetPosWall(int i)
+{
+	return g_wall[i].m_pos;
+}
+
+// 壁サイズ取得
+XMFLOAT3 GetSizeWall(int i)
+{
+	return g_wall[i].m_size;
+}
+
+
+
+
+// 壁位置取得
 XMFLOAT3 GetWallPos()
 {
 	return g_wall->m_pos;
@@ -199,7 +213,7 @@ XMFLOAT3 GetWallSize()
 //=============================================================================
 bool CollisionWall(XMFLOAT3 Apos, XMFLOAT3 Asize, XMFLOAT3 Bpos, XMFLOAT3 Bsize)
 {
-
+	
 	return CollisionAABB(Apos, Asize, Bpos, Bsize);
 
 }

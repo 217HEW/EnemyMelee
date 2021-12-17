@@ -20,6 +20,7 @@
 #include "collision.h"
 #include "main.h"
 #include "player.h"
+#include "Wall.h"
 
 //**************************************************************
 // 構造体定義
@@ -27,6 +28,7 @@
 struct TEnemy {
 	XMFLOAT3	m_pos;		// 現在の位置
 	XMFLOAT3	m_rot;		// 現在の向き
+	XMFLOAT3	m_size;
 	XMFLOAT3	m_rotDest;	// 目的の向き
 	XMFLOAT3	m_move;		// 移動量
 	bool		m_use;		// 使用してるか否か	ON:使用中
@@ -79,6 +81,7 @@ HRESULT InitEnemyMelee(void)
 	for (int i = 0; i < MAX_ENEMYMELEE; ++i)
 	{// 初期化したいモノがあればここに↓
 		g_EMelee[i].m_pos = (XMFLOAT3(0.0f, 0.0f, 0.0f));
+		g_EMelee[i].m_size = (XMFLOAT3(10.0f, 10.0f, 10.0f));
 		g_EMelee[i].m_move = (XMFLOAT3(0.0f, 0.0f, 0.0f));
 		g_EMelee[i].m_rot = (XMFLOAT3(3.0f, 0.0f, 0.0f));
 		g_EMelee[i].m_rotDest = g_EMelee[i].m_rot;
@@ -118,7 +121,10 @@ void UpdateEnemyMelee(void)
 	//プレイヤーの座標取得
 	XMFLOAT3 posPlayer = GetPlayerPos();
 
-
+	
+	//壁座標取得
+	//XMFLOAT3 posWall = GetPosWall();
+	//XMFLOAT3 sizeWall = GetSizeWall();
 	for (int i = 0; i < MAX_ENEMYMELEE; ++i)
 	{
 		if (!g_EMelee[i].m_use)
@@ -168,6 +174,12 @@ void UpdateEnemyMelee(void)
 			//= 10 * 10;
 		}
 
+		// 敵と壁の当たり判定
+		if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, GetPosWall(i), GetSizeWall(i)))
+		{
+			g_EMelee[i].m_pos = XMFLOAT3(0.0f, 40.0f, 0.0f);
+		}
+
 		 //目的の角度までの差分
 		float fDiffRotY = g_EMelee[i].m_rotDest.y - g_EMelee[i].m_rot.y;
 		if (fDiffRotY >= 180.0f) {
@@ -189,7 +201,6 @@ void UpdateEnemyMelee(void)
 			-SinDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY,
 			0.0f,
 			-CosDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY);
-
 
 		// ワールドマトリックスの初期化
 		mtxWorld = XMMatrixIdentity();
@@ -265,7 +276,7 @@ int SetEnemyMelee(XMFLOAT3 pos)
 		g_EMelee[cntEnemyMelee].m_use = true;	// 使用中ON
 		g_EMelee[cntEnemyMelee].m_pos = pos;	// 指定した座標を代入
 
-		EnemyMelee = cntEnemyMelee;	// 使用中の敵数を代入
+		EnemyMelee = cntEnemyMelee + 1;	// 使用中の敵数を代入
 		break;
 	}
 
