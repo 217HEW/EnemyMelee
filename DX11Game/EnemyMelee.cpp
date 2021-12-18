@@ -21,6 +21,7 @@
 #include "main.h"
 #include "player.h"
 #include "Wall.h"
+#include "explosion.h"
 
 //**************************************************************
 // 構造体定義
@@ -120,6 +121,7 @@ void UpdateEnemyMelee(void)
 
 	//プレイヤーの座標取得
 	XMFLOAT3 posPlayer = GetPlayerPos();
+	XMFLOAT3 sizePlayer = GetPlayerSize();
 
 	
 	//壁座標取得
@@ -167,6 +169,10 @@ void UpdateEnemyMelee(void)
 		
 		}
 
+		//************************************************************************
+		//		当たり判定
+		//************************************************************************
+
 		// 敵同士の当たり判定
 		if (CollisionSphere(g_EMelee[i].m_pos, 15, g_EMelee[i + 1].m_pos, 15))
 		{
@@ -179,6 +185,20 @@ void UpdateEnemyMelee(void)
 		{
 			g_EMelee[i].m_pos = XMFLOAT3(0.0f, 40.0f, 0.0f);
 		}
+
+		// 敵とプレイヤーの当たり判定
+		if (!g_EMelee[i].m_use)
+		{// 未使用なら次へ
+			continue;
+		}
+		if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, posPlayer, sizePlayer))
+		{
+			StartExplosion(g_EMelee[i].m_pos, XMFLOAT2(20.0f, 20.0f));
+			g_EMelee[i].m_use = false;
+		}
+
+
+
 
 		 //目的の角度までの差分
 		float fDiffRotY = g_EMelee[i].m_rotDest.y - g_EMelee[i].m_rot.y;
