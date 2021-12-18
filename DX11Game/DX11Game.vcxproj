@@ -175,6 +175,7 @@
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="meshfield.cpp" />
     <ClCompile Include="meshwall.cpp" />
+    <ClCompile Include="pause.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="polygon.cpp" />
     <ClCompile Include="polyline.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="meshfield.h" />
     <ClInclude Include="meshwall.h" />
+    <ClInclude Include="pause.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="polygon.h" />
     <ClInclude Include="polyline.h" />

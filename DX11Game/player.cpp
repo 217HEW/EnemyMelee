@@ -216,15 +216,15 @@ void UpdatePlayer(void)
 	}
 
 	// •Ç‚Æ‚Ì“–‚½‚è”»’è
-	XMFLOAT3 posWall = GetWallPos();
-	XMFLOAT3 sizeWall = GetWallSize();
-	for (int i = 0; i < MAX_WALL; ++i)
-	{
-		if (CollisionWall(g_posModel, g_sizeModel, posWall, sizeWall))
-		{
-			//g_posModel = XMFLOAT3(0.0f, 40.0f, 0.0f);
-		}
-	}
+	//XMFLOAT3 posWall = GetWallPos();
+	//XMFLOAT3 sizeWall = GetWallSize();
+	//for (int i = 0; i < MAX_WALL; ++i)
+	//{
+	//	if (CollisionWall(g_posModel, g_sizeModel, posWall, sizeWall))
+	//	{
+	//		//g_posModel = XMFLOAT3(0.0f, 40.0f, 0.0f);
+	//	}
+	//}
 
 
 	if (GetKeyPress(VK_RETURN)) {

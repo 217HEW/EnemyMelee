@@ -21,20 +21,6 @@
 
 
 //*****************************************************************************
-// 構造体定義
-//*****************************************************************************
-struct TWall {
-	XMFLOAT3	m_pos;		// 現在の位置
-	XMFLOAT3	m_rot;		// 現在の向き
-	XMFLOAT3    m_size;		// 現在のサイズ
-	XMFLOAT4X4	m_mtxWorld;	// ワールドマトリックス
-
-	int			m_nLife;	// 壁の耐久置
-	bool		use;		// 使用しているか
-
-};
-
-//*****************************************************************************
 // グローバル変数
 //*****************************************************************************
 static CAssimpModel	g_model;			// モデル
@@ -51,7 +37,7 @@ HRESULT InitWall(void)
 
 	for (int i = 0; i < MAX_WALL; ++i)
 	{
-		g_wall[i].m_size = XMFLOAT3(38.0f, 38.0f, 38.0f);
+		g_wall[i].m_size = XMFLOAT3(42.0f, 42.0f, 42.0f);
 		//g_wall->m_pos = XMFLOAT3(0.0f, 50.0f, 150.0f);
 		g_wall[i].m_nLife = MAX_LIFE;
 		g_wall[i].use = false;
@@ -116,7 +102,7 @@ void UpdateWall(void)
 		}
 
 		// 壁とプレイヤーが衝突していたら
-		if (CollisionWall(g_wall[i].m_pos, g_wall[i].m_size, GetPlayerPos(), GetPlayerSize()))
+		/*if (CollisionWall(g_wall[i].m_pos, g_wall[i].m_size, GetPlayerPos(), GetPlayerSize()))
 		{
 			StartExplosion(g_wall[i].m_pos, XMFLOAT2(80.0f, 80.0f));
 			g_wall[i].m_nLife--;
@@ -125,7 +111,7 @@ void UpdateWall(void)
 			{
 				g_wall[i].use = false;
 			}
-		}
+		}*/
 	}
 }
 
@@ -181,30 +167,36 @@ int SetWall(XMFLOAT3 pos)
 	return Wall;
 }
 
-// 壁位置取得
-XMFLOAT3 GetPosWall(int i)
-{
-	return g_wall[i].m_pos;
-}
 
-// 壁サイズ取得
-XMFLOAT3 GetSizeWall(int i)
+TWall* GetWall()
 {
-	return g_wall[i].m_size;
+	return g_wall;
 }
-
 
 // 壁位置取得
-XMFLOAT3 GetWallPos()
-{
-	return g_wall->m_pos;
-}
+//XMFLOAT3 GetPosWall(int i)
+//{
+//	return g_wall[i].m_pos;
+//}
+//
+//// 壁サイズ取得
+//XMFLOAT3 GetSizeWall(int i)
+//{
+//	return g_wall[i].m_size;
+//}
 
-// 壁サイズ取得
-XMFLOAT3 GetWallSize()
-{
-	return g_wall->m_size;
-}
+
+// 壁位置取得
+//XMFLOAT3 GetWallPos()
+//{
+//	return g_wall->m_pos;
+//}
+//
+//// 壁サイズ取得
+//XMFLOAT3 GetWallSize()
+//{
+//	return g_wall->m_size;
+//}
 
 //=============================================================================
 // 衝突判定
