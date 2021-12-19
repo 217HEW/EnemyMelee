@@ -113,9 +113,12 @@ void UpdateEnemyMelee(void)
 	XMMATRIX mtxWorld, mtxRot, mtxTranslate;
 
 
+	
+
 	//プレイヤーの座標・サイズ取得
 	XMFLOAT3 posPlayer = GetPlayerPos();
 	XMFLOAT3 sizePlayer = GetPlayerSize();
+
 
 
 	for (int i = 0; i < MAX_ENEMYMELEE; ++i)
@@ -123,138 +126,142 @@ void UpdateEnemyMelee(void)
 		//壁取得
 		TWall *Wall = GetWall();
 
-		if (!g_EMelee[i].m_use)
+		//敵とプレイヤーの距離が近づいたら
+		if (CollisionSphere(posPlayer, sizePlayer.x, g_EMelee[i].m_pos, 300))
 		{
-			continue;
-		}
-		
-		//常にプレイヤーの方向を向く
-		/*g_EMelee[i].m_rotDest = posPlayer;
-		g_EMelee[i].m_rot = g_EMelee[i].m_rotDest;
-		g_EMelee[i].m_rot = XMFLOAT3(posPlayer.x, posPlayer.y, posPlayer.z);*/
+			if (!g_EMelee[i].m_use)
+			{//未使用なら次へ
+				continue;
+			}
+			//常にプレイヤーの方向を向く
+			/*g_EMelee[i].m_rotDest = posPlayer;
+			g_EMelee[i].m_rot = g_EMelee[i].m_rotDest;
+			g_EMelee[i].m_rot = XMFLOAT3(posPlayer.x, posPlayer.y, posPlayer.z);*/
 
 		
-		//敵のx座標がプレイヤーよりも大きかったら
-		if (g_EMelee[i].m_pos.x >= posPlayer.x)
-		{
-			g_EMelee[i].m_pos.x += -VALUE_MOVE_ENEMY;
-			//g_EMelee[i].m_rot = (XMFLOAT3(0.0f, 90.0f, 0.0f));
+			//敵のx座標がプレイヤーよりも大きかったら
+			if (g_EMelee[i].m_pos.x >= posPlayer.x)
+			{
+				g_EMelee[i].m_pos.x += -VALUE_MOVE_ENEMY;
+				g_EMelee[i].m_rot = (XMFLOAT3(0.0f, 90.0f, 0.0f));
 
-		}
-		//敵のx座標がプレイヤーよりも小さかったら
-		if (g_EMelee[i].m_pos.x <= posPlayer.x)
-		{
-			g_EMelee[i].m_pos.x += VALUE_MOVE_ENEMY;
-			//g_EMelee[i].m_rot = (XMFLOAT3(0.0f, -90.0f, 0.0f));
+			}
+			//敵のx座標がプレイヤーよりも小さかったら
+			if (g_EMelee[i].m_pos.x <= posPlayer.x)
+			{
+				g_EMelee[i].m_pos.x += VALUE_MOVE_ENEMY;
+				g_EMelee[i].m_rot = (XMFLOAT3(0.0f, -90.0f, 0.0f));
 	
-		}
-		//敵のz座標がプレイヤーよりも大きかったら
-		if (g_EMelee[i].m_pos.z >= posPlayer.z)
-		{
-			g_EMelee[i].m_pos.z += -VALUE_MOVE_ENEMY;
+			}
+			//敵のz座標がプレイヤーよりも大きかったら
+			if (g_EMelee[i].m_pos.z >= posPlayer.z)
+			{
+				g_EMelee[i].m_pos.z += -VALUE_MOVE_ENEMY;
 
-		}
-		//敵のz座標がプレイヤーよりも小さかったら
-		if (g_EMelee[i].m_pos.z <= posPlayer.z)
-		{
-			g_EMelee[i].m_pos.z += VALUE_MOVE_ENEMY;
+			}
+			//敵のz座標がプレイヤーよりも小さかったら
+			if (g_EMelee[i].m_pos.z <= posPlayer.z)
+			{
+				g_EMelee[i].m_pos.z += VALUE_MOVE_ENEMY;
 		
-		}
+			}
 
-		//************************************************************************
-		//		当たり判定
-		//************************************************************************
+			//************************************************************************
+			//		当たり判定
+			//************************************************************************
 
-		// 敵同士の当たり判定
-		if (CollisionSphere(g_EMelee[i].m_pos, 15, g_EMelee[i + 1].m_pos, 15))
-		{
-			g_EMelee[i + 1].m_pos.x += VALUE_MOVE_ENEMY;
-			//= 10 * 10;
-		}
+			// 敵同士の当たり判定
+			if (CollisionSphere(g_EMelee[i].m_pos, 15, g_EMelee[i + 1].m_pos, 15))
+			{
+				g_EMelee[i + 1].m_pos.x += VALUE_MOVE_ENEMY;
+				//= 10 * 10;
+			}
 
 	
-		// 敵と壁の当たり判定
-		for (int j = 0; j < MAX_WALL; ++j, ++Wall)
-		{
-			if (!Wall->use)
+			// 敵と壁の当たり判定
+			for (int j = 0; j < MAX_WALL; ++j, ++Wall)
+			{
+				if (!Wall->use)
+				{// 未使用なら次へ
+					continue;
+				}
+				if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, Wall->m_pos, Wall->m_size))
+				{
+					//g_EMelee[i].m_pos = XMFLOAT3(0.0f, 40.0f, 0.0f);
+
+					if (g_EMelee[i].m_pos.x - g_EMelee[i].m_size.x < (Wall->m_pos.x + Wall->m_size.x)) 
+					{
+						g_EMelee[i].m_pos.x = Wall->m_pos.x + Wall->m_size.x;
+					}
+					if (g_EMelee[i].m_pos.x + g_EMelee[i].m_size.x > (Wall->m_pos.x - Wall->m_size.x))
+					{
+						g_EMelee[i].m_pos.x = (Wall->m_pos.x - Wall->m_size.x);
+					}
+					/*if (g_EMelee[i].m_pos.z < Wall->m_pos.z + (Wall->m_size.z))
+					{
+						g_EMelee[i].m_pos.z = Wall->m_pos.z + (Wall->m_size.z);
+					}
+					else if (g_EMelee[i].m_pos.z > Wall->m_pos.z - (Wall->m_size.z))
+					{
+						g_EMelee[i].m_pos.z = Wall->m_pos.z - (Wall->m_size.z);
+					}*/
+				}
+			}
+
+			// 敵とプレイヤーの当たり判定
+			if (!g_EMelee[i].m_use)
 			{// 未使用なら次へ
 				continue;
 			}
-			if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, Wall->m_pos, Wall->m_size))
+			if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, posPlayer, sizePlayer))
 			{
-				//g_EMelee[i].m_pos = XMFLOAT3(0.0f, 40.0f, 0.0f);
-
-				if (g_EMelee[i].m_pos.x - g_EMelee[i].m_size.x < (Wall->m_pos.x + Wall->m_size.x)) 
-				{
-					g_EMelee[i].m_pos.x = Wall->m_pos.x + Wall->m_size.x;
-				}
-				if (g_EMelee[i].m_pos.x + g_EMelee[i].m_size.x > (Wall->m_pos.x - Wall->m_size.x))
-				{
-					g_EMelee[i].m_pos.x = (Wall->m_pos.x - Wall->m_size.x);
-				}
-				/*if (g_EMelee[i].m_pos.z < Wall->m_pos.z + (Wall->m_size.z))
-				{
-					g_EMelee[i].m_pos.z = Wall->m_pos.z + (Wall->m_size.z);
-				}
-				else if (g_EMelee[i].m_pos.z > Wall->m_pos.z - (Wall->m_size.z))
-				{
-					g_EMelee[i].m_pos.z = Wall->m_pos.z - (Wall->m_size.z);
-				}*/
+				StartExplosion(g_EMelee[i].m_pos, XMFLOAT2(20.0f, 20.0f));
+				g_EMelee[i].m_use = false;
 			}
+
+			 //目的の角度までの差分
+			float fDiffRotY = g_EMelee[i].m_rotDest.y - g_EMelee[i].m_rot.y;
+			if (fDiffRotY >= 180.0f) {
+				fDiffRotY -= 360.0f;
+			}
+			if (fDiffRotY < -180.0f) {
+				fDiffRotY += 360.0f;
+			}
+
+			// 目的の角度まで慣性をかける
+			g_EMelee[i].m_rot.y += fDiffRotY * RATE_ROTATE_ENEMY;
+			if (g_EMelee[i].m_rot.y >= 180.0f) {
+				g_EMelee[i].m_rot.y -= 360.0f;
+			}
+			if (g_EMelee[i].m_rot.y < -180.0f) {
+				g_EMelee[i].m_rot.y += 360.0f;
+			}
+			g_EMelee[i].m_move = XMFLOAT3(
+				-SinDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY,
+				0.0f,
+				-CosDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY);
+
+			// ワールドマトリックスの初期化
+			mtxWorld = XMMatrixIdentity();
+
+			// 回転を反映
+			mtxRot = XMMatrixRotationRollPitchYaw(
+				XMConvertToRadians(g_EMelee[i].m_rot.x),
+				XMConvertToRadians(g_EMelee[i].m_rot.y),
+				XMConvertToRadians(g_EMelee[i].m_rot.z));
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+			// 移動を反映
+			mtxTranslate = XMMatrixTranslation(
+				g_EMelee[i].m_pos.x,
+				g_EMelee[i].m_pos.y,
+				g_EMelee[i].m_pos.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+			// ワールドマトリックス設定
+			XMStoreFloat4x4(&g_EMelee[i].m_mtxWorld, mtxWorld);
+
 		}
-
-		// 敵とプレイヤーの当たり判定
-		//if (!g_EMelee[i].m_use)
-		//{// 未使用なら次へ
-		//	continue;
-		//}
-		//if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, posPlayer, sizePlayer))
-		//{
-		//	StartExplosion(g_EMelee[i].m_pos, XMFLOAT2(20.0f, 20.0f));
-		//	g_EMelee[i].m_use = false;
-		//}
-
-		 //目的の角度までの差分
-		float fDiffRotY = g_EMelee[i].m_rotDest.y - g_EMelee[i].m_rot.y;
-		if (fDiffRotY >= 180.0f) {
-			fDiffRotY -= 360.0f;
-		}
-		if (fDiffRotY < -180.0f) {
-			fDiffRotY += 360.0f;
-		}
-
-		// 目的の角度まで慣性をかける
-		g_EMelee[i].m_rot.y += fDiffRotY * RATE_ROTATE_ENEMY;
-		if (g_EMelee[i].m_rot.y >= 180.0f) {
-			g_EMelee[i].m_rot.y -= 360.0f;
-		}
-		if (g_EMelee[i].m_rot.y < -180.0f) {
-			g_EMelee[i].m_rot.y += 360.0f;
-		}
-		g_EMelee[i].m_move = XMFLOAT3(
-			-SinDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY,
-			0.0f,
-			-CosDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY);
-
-		// ワールドマトリックスの初期化
-		mtxWorld = XMMatrixIdentity();
-
-		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(g_EMelee[i].m_rot.x),
-			XMConvertToRadians(g_EMelee[i].m_rot.y),
-			XMConvertToRadians(g_EMelee[i].m_rot.z));
-		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
-
-		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(
-			g_EMelee[i].m_pos.x,
-			g_EMelee[i].m_pos.y,
-			g_EMelee[i].m_pos.z);
-		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
-
-		// ワールドマトリックス設定
-		XMStoreFloat4x4(&g_EMelee[i].m_mtxWorld, mtxWorld);
 	}
 }
 
