@@ -23,7 +23,7 @@
 #include "billboard.h"
 #include "Wall.h"
 #include "EnemyMelee.h"
-//#include "pause.h"
+#include "pause.h"
 
 //-------- ライブラリのリンク
 #pragma comment(lib, "winmm")
@@ -516,9 +516,6 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	return hr;
 
 	hr = InitEnemyMelee();
-	
-	//SetEnemyMelee(XMFLOAT3(rand() % 620 - 310.0f, 20.0f, rand() % 620 - 310.0f));
-	
 	SetEnemyMelee(XMFLOAT3(0.0f, 40.0f, 0.0f));
 	SetEnemyMelee(XMFLOAT3(-200.0f, 40.0f, 0.0f));
 	SetEnemyMelee(XMFLOAT3(200.0f, 40.0f, 0.0f));
@@ -526,10 +523,11 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	if (FAILED(hr))
 		return hr;
 	
-	/*hr = InitPause();
+	hr = InitPause();
+	g_bPause = false;
 	if (FAILED(hr))
 	return hr;
-	g_bPause = false;*/
+	
 
 }
 
@@ -552,7 +550,7 @@ void ReleaseBackBuffer()
 void Uninit(void)
 {
 	//ポーズ終了処理
-	//UninitPause();
+	UninitPause();
 
 	// 近接敵終了
 	UninitEnemyMelee();
@@ -640,16 +638,16 @@ void Uninit(void)
 //=============================================================================
 void Update(void)
 {
-	//一時停止中?
-	//if (g_bPause) {
-	//	//一時停止更新
-	//	UpdatePause();
-	//}
-	//else
-	//{
-		// 入力処理更新
-		UpdateInput();	// 必ずUpdate関数の先頭で実行.
+	// 入力処理更新
+	UpdateInput();	// 必ずUpdate関数の先頭で実行.
 
+	//一時停止中?
+	if (g_bPause) {
+		//一時停止更新
+		UpdatePause();
+	}
+	else
+	{
 		// デバッグ文字列表示更新
 		UpdateDebugProc();
 
@@ -703,45 +701,43 @@ void Update(void)
 		// 近接敵更新
 		UpdateEnemyMelee();
 
-		// ポーズ更新
-		//UpdatePause();
-	//}
+	}
 	//一時停止ON/OFF
-	//if (GetKeyTrigger(VK_P) || GetKeyTrigger(VK_PAUSE))
-	//{
-	//	//if (GetFade() == FADE_NONE) {
-	//		g_bPause = !g_bPause;
-	//		if (g_bPause) {
-	//			//CSound::Pause();
-	//			//CSound::Play(SE_DECIDE);
-	//			ResetPauseMenu();
-	//		}
-	//		else {
-	//			//CSound::Play(SE_CANCEL);
-	//			//CSound::Resume();
-	//		}
-	//	//}
-	//}
+	if (GetKeyTrigger(VK_P) || GetKeyTrigger(VK_PAUSE))
+	{
+		//if (GetFade() == FADE_NONE) {
+			g_bPause = !g_bPause;
+			if (g_bPause) {
+				//CSound::Pause();
+				//CSound::Play(SE_DECIDE);
+				ResetPauseMenu();
+			}
+			else {
+				//CSound::Play(SE_CANCEL);
+				//CSound::Resume();
+			}
+		//}
+	}
 
 	//一時停止メニューの選択
 	//if (g_bPause && GetFade() == FADE_NONE) {
 		//[ENTER]が押された?
-		//if (GetKeyTrigger(VK_RETURN)) {
-		//	//選択中のメニュー項目により分岐
-		//	switch (GetPauseMenu()) {
-		//	case PAUSE_MENU_CONTINUE:
-		//		g_bPause = false;
-		//		//CSound::Play(SE_CANCEL);
-		//		//CSound::Resume();
-		//		break;
-		//	case PAUSE_MENU_RETRY:
-		//		//StartFadeOut(SCENE_GAME);
-		//		break;
-		//	case PAUSE_MENU_QUIT:
-		//		//StartFadeOut(SCENE_TITLE);
-		//		break;
-		//	}
-		//}
+		if (GetKeyTrigger(VK_RETURN)) {
+			//選択中のメニュー項目により分岐
+			switch (GetPauseMenu()) {
+			case PAUSE_MENU_CONTINUE:
+				g_bPause = false;
+				//CSound::Play(SE_CANCEL);
+				//CSound::Resume();
+				break;
+			case PAUSE_MENU_RETRY:
+				//StartFadeOut(SCENE_GAME);
+				break;
+			case PAUSE_MENU_QUIT:
+				//StartFadeOut(SCENE_TITLE);
+				break;
+			}
+		}
 	//}
 }
 
@@ -803,13 +799,12 @@ void Draw(void)
 
 	DrawEnemyMelee();
 
-	//SetZBuffer(false);
-	//DrawPause();
-	////一時停止描画
-	//if (g_bPause) {
-	//	DrawPause();
-	//}
-	//SetZBuffer(true);
+	SetZBuffer(false);
+	//一時停止描画
+	if (g_bPause) {
+		DrawPause();
+	}
+	SetZBuffer(true);
 	
 	// Zバッファ無効(Zチェック無&Z更新無)
 	SetZBuffer(false);

@@ -41,7 +41,7 @@ struct TEnemy {
 //**************************************************************
 // マクロ定義
 //**************************************************************
-#define MODEL_ENEMY			"data/model/enemy3.fbx"
+#define MODEL_ENEMY			"data/model/helicopter000.fbx"
 
 #define	VALUE_MOVE_ENEMY		(1.0f)		// 移動速度
 #define MAX_ENEMYMELEE			(10)		// 敵機最大数
@@ -77,7 +77,7 @@ HRESULT InitEnemyMelee(void)
 		g_EMelee[i].m_pos = (XMFLOAT3(0.0f, 0.0f, 0.0f));
 		g_EMelee[i].m_size = (XMFLOAT3(25.0f, 25.0f, 25.0f));
 		g_EMelee[i].m_move = (XMFLOAT3(0.0f, 0.0f, 0.0f));
-		g_EMelee[i].m_rot = (XMFLOAT3(90.0f, 0.0f, 0.0f));
+		g_EMelee[i].m_rot = (XMFLOAT3(0.0f, 0.0f, 0.0f));
 		g_EMelee[i].m_rotDest = g_EMelee[i].m_rot;
 		g_EMelee[i].m_use = false;
 	}
@@ -180,7 +180,6 @@ void UpdateEnemyMelee(void)
 			{// 未使用なら次へ
 				continue;
 			}
-
 			if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, Wall->m_pos, Wall->m_size))
 			{
 				//g_EMelee[i].m_pos = XMFLOAT3(0.0f, 40.0f, 0.0f);
