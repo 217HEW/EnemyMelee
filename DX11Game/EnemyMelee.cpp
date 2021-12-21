@@ -9,6 +9,7 @@
 //	開発履歴
 //	2021/12/15 プレイヤーを追従する動きの実装
 //	2021/12/18 敵同士、壁、プレイヤーとの当たり判定の実装
+//	2021/12/21 壁と当たったら止まる(全方位)処理の実装
 //
 //**************************************************************
 
@@ -36,18 +37,22 @@ struct TEnemy {
 	bool		m_use;		// 使用してるか否か	ON:使用中
 
 	XMFLOAT4X4	m_mtxWorld;	// ワールドマトリックス
+	int			m_speed;	// スピード
 };
 
 //**************************************************************
 // マクロ定義
 //**************************************************************
-#define MODEL_ENEMY			"data/model/helicopter000.fbx"
+//#define MODEL_ENEMY			"data/model/helicopter000.fbx"
+#define MODEL_ENEMY			"data/model/enemy3.fbx"
 
 #define	VALUE_MOVE_ENEMY		(1.0f)		// 移動速度
 #define MAX_ENEMYMELEE			(10)		// 敵機最大数
 
-#define	VALUE_ROTATE_ENEMY	(7.0f)		// 回転速度
-#define	RATE_ROTATE_ENEMY	(0.20f)		// 回転慣性係数
+#define	VALUE_ROTATE_ENEMY		(7.0f)		// 回転速度
+#define	RATE_ROTATE_ENEMY		(0.20f)		// 回転慣性係数
+
+#define SEARCH_ENEMY			(250)		// 探索範囲
 
 
 //**************************************************************
@@ -75,24 +80,13 @@ HRESULT InitEnemyMelee(void)
 	for (int i = 0; i < MAX_ENEMYMELEE; ++i)
 	{// 初期化したいモノがあればここに↓
 		g_EMelee[i].m_pos = (XMFLOAT3(0.0f, 0.0f, 0.0f));
-		g_EMelee[i].m_size = (XMFLOAT3(25.0f, 25.0f, 25.0f));
+		g_EMelee[i].m_size = (XMFLOAT3(10.0f, 10.0f, 10.0f));
 		g_EMelee[i].m_move = (XMFLOAT3(0.0f, 0.0f, 0.0f));
-		g_EMelee[i].m_rot = (XMFLOAT3(0.0f, 0.0f, 0.0f));
+		g_EMelee[i].m_rot = (XMFLOAT3(90.0f, 0.0f, 0.0f));
 		g_EMelee[i].m_rotDest = g_EMelee[i].m_rot;
 		g_EMelee[i].m_use = false;
 	}
 
-	//for (int i = 0; i < MAX_ENEMYMELEE; ++i)
-	//{
-	//	// 位置・回転・スケールの初期設定
-	//	g_EMelee[i].m_pos = XMFLOAT3(rand() % 620 - 310.0f, 20.0f, rand() % 620 - 310.0f);
-	//	g_EMelee[i].m_rot = XMFLOAT3(0.0f, rand() % 360 - 180.0f, 0.0f);
-	//	g_EMelee[i].m_rotDest = g_EMelee[i].m_rot;
-	//	g_EMelee[i].m_move = XMFLOAT3(-SinDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY,0.0f,
-	//		-CosDeg(g_EMelee[i].m_rot.y) * VALUE_MOVE_ENEMY);
-	//}
-
-	
 	return hr;
 }
 
@@ -110,16 +104,14 @@ void UninitEnemyMelee(void)
 //**************************************************************
 void UpdateEnemyMelee(void)
 {
+	// カメラの向き取得
+	XMFLOAT3 rotCamera = CCamera::Get()->GetAngle();
+
 	XMMATRIX mtxWorld, mtxRot, mtxTranslate;
-
-
-	
 
 	//プレイヤーの座標・サイズ取得
 	XMFLOAT3 posPlayer = GetPlayerPos();
 	XMFLOAT3 sizePlayer = GetPlayerSize();
-
-
 
 	for (int i = 0; i < MAX_ENEMYMELEE; ++i)
 	{
@@ -127,57 +119,65 @@ void UpdateEnemyMelee(void)
 		TWall *Wall = GetWall();
 
 		//敵とプレイヤーの距離が近づいたら
-		if (CollisionSphere(posPlayer, sizePlayer.x, g_EMelee[i].m_pos, 300))
+		if (CollisionSphere(posPlayer, sizePlayer.x, g_EMelee[i].m_pos, SEARCH_ENEMY))
 		{
 			if (!g_EMelee[i].m_use)
 			{//未使用なら次へ
 				continue;
 			}
+
 			//常にプレイヤーの方向を向く
 			/*g_EMelee[i].m_rotDest = posPlayer;
 			g_EMelee[i].m_rot = g_EMelee[i].m_rotDest;
 			g_EMelee[i].m_rot = XMFLOAT3(posPlayer.x, posPlayer.y, posPlayer.z);*/
 
-		
 			//敵のx座標がプレイヤーよりも大きかったら
 			if (g_EMelee[i].m_pos.x >= posPlayer.x)
 			{
 				g_EMelee[i].m_pos.x += -VALUE_MOVE_ENEMY;
-				g_EMelee[i].m_rot = (XMFLOAT3(0.0f, 90.0f, 0.0f));
+				g_EMelee[i].m_rot = (XMFLOAT3(90.0f, 0.0f, 0.0f) );
 
+				g_EMelee[i].m_rotDest.y = rotCamera.y - 90.0f;
 			}
 			//敵のx座標がプレイヤーよりも小さかったら
 			if (g_EMelee[i].m_pos.x <= posPlayer.x)
 			{
 				g_EMelee[i].m_pos.x += VALUE_MOVE_ENEMY;
-				g_EMelee[i].m_rot = (XMFLOAT3(0.0f, -90.0f, 0.0f));
-	
-			}
-			//敵のz座標がプレイヤーよりも大きかったら
-			if (g_EMelee[i].m_pos.z >= posPlayer.z)
-			{
-				g_EMelee[i].m_pos.z += -VALUE_MOVE_ENEMY;
+				g_EMelee[i].m_rot = (XMFLOAT3(90.0f, 0.0f, 90.0f));
+				g_EMelee[i].m_rotDest.y = rotCamera.y + 90.0f;
 
 			}
-			//敵のz座標がプレイヤーよりも小さかったら
-			if (g_EMelee[i].m_pos.z <= posPlayer.z)
+			//敵のy座標がプレイヤーよりも大きかったら
+			if (g_EMelee[i].m_pos.y >= posPlayer.y)
 			{
-				g_EMelee[i].m_pos.z += VALUE_MOVE_ENEMY;
-		
-			}
+				g_EMelee[i].m_pos.y += -VALUE_MOVE_ENEMY;
 
-			//************************************************************************
+			}
+			//敵のy座標がプレイヤーよりも小さかったら
+			if (g_EMelee[i].m_pos.y <= posPlayer.y)
+			{
+				g_EMelee[i].m_pos.y += VALUE_MOVE_ENEMY;
+
+			}
+			
+			//**************************************************************************************
 			//		当たり判定
-			//************************************************************************
+			//**************************************************************************************
 
 			// 敵同士の当たり判定
-			if (CollisionSphere(g_EMelee[i].m_pos, 15, g_EMelee[i + 1].m_pos, 15))
+			for (int j = 0; j < MAX_ENEMYMELEE; ++j)
 			{
-				g_EMelee[i + 1].m_pos.x += VALUE_MOVE_ENEMY;
-				//= 10 * 10;
+				if (CollisionSphere(g_EMelee[i].m_pos, g_EMelee[i].m_size.x, g_EMelee[j].m_pos, g_EMelee[j].m_size.x))
+				{
+					if (i == j)
+					{//同じ敵ならとばす
+						continue;
+					}
+					//敵同士が重ならない処理
+					
+				}
 			}
 
-	
 			// 敵と壁の当たり判定
 			for (int j = 0; j < MAX_WALL; ++j, ++Wall)
 			{
@@ -187,37 +187,40 @@ void UpdateEnemyMelee(void)
 				}
 				if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, Wall->m_pos, Wall->m_size))
 				{
-					//g_EMelee[i].m_pos = XMFLOAT3(0.0f, 40.0f, 0.0f);
-
-					if (g_EMelee[i].m_pos.x - g_EMelee[i].m_size.x < (Wall->m_pos.x + Wall->m_size.x)) 
+					//壁に当たると止まる
+					//右
+					if (Wall->m_pos.x + Wall->m_size.x / 2 <= g_EMelee[i].m_pos.x - g_EMelee[i].m_size.x / 2)
 					{
-						g_EMelee[i].m_pos.x = Wall->m_pos.x + Wall->m_size.x;
+					 	g_EMelee[i].m_pos.x = (Wall->m_pos.x + Wall->m_size.x + g_EMelee[i].m_size.x);
 					}
-					if (g_EMelee[i].m_pos.x + g_EMelee[i].m_size.x > (Wall->m_pos.x - Wall->m_size.x))
+					//左
+					else if (Wall->m_pos.x - Wall->m_size.x / 2 >= g_EMelee[i].m_pos.x + g_EMelee[i].m_size.x / 2)
 					{
-						g_EMelee[i].m_pos.x = (Wall->m_pos.x - Wall->m_size.x);
+					 	g_EMelee[i].m_pos.x = (Wall->m_pos.x - Wall->m_size.x - g_EMelee[i].m_size.x);
 					}
-					/*if (g_EMelee[i].m_pos.z < Wall->m_pos.z + (Wall->m_size.z))
+					//上
+					else if (Wall->m_pos.y - Wall->m_size.y / 2 >= g_EMelee[i].m_pos.y + g_EMelee[i].m_size.y / 2)
 					{
-						g_EMelee[i].m_pos.z = Wall->m_pos.z + (Wall->m_size.z);
+						g_EMelee[i].m_pos.y = (Wall->m_pos.y - Wall->m_size.y - g_EMelee[i].m_size.y);
 					}
-					else if (g_EMelee[i].m_pos.z > Wall->m_pos.z - (Wall->m_size.z))
+					//下
+					else if (Wall->m_pos.y + Wall->m_size.y / 2 <= g_EMelee[i].m_pos.y - g_EMelee[i].m_size.y / 2)
 					{
-						g_EMelee[i].m_pos.z = Wall->m_pos.z - (Wall->m_size.z);
-					}*/
+						g_EMelee[i].m_pos.y = (Wall->m_pos.y + Wall->m_size.y + g_EMelee[i].m_size.y);
+					}
 				}
 			}
 
 			// 敵とプレイヤーの当たり判定
-			if (!g_EMelee[i].m_use)
-			{// 未使用なら次へ
-				continue;
-			}
-			if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, posPlayer, sizePlayer))
-			{
-				StartExplosion(g_EMelee[i].m_pos, XMFLOAT2(20.0f, 20.0f));
-				g_EMelee[i].m_use = false;
-			}
+			//if (!g_EMelee[i].m_use)
+			//{// 未使用なら次へ
+			//	continue;
+			//}
+			//if (CollisionAABB(g_EMelee[i].m_pos, g_EMelee[i].m_size, posPlayer, sizePlayer))
+			//{
+			//	StartExplosion(g_EMelee[i].m_pos, XMFLOAT2(20.0f, 20.0f));
+			//	g_EMelee[i].m_use = false;
+			//}
 
 			 //目的の角度までの差分
 			float fDiffRotY = g_EMelee[i].m_rotDest.y - g_EMelee[i].m_rot.y;
@@ -292,7 +295,7 @@ void DrawEnemyMelee(void)
 	}
 }
 
-//*******************************
+//*****************************************************************
 //
 //	敵の配置処理
 //	
@@ -301,7 +304,7 @@ void DrawEnemyMelee(void)
 //	戻り値
 //		:使用している敵の最大数
 //
-//*******************************
+//****************************************************************
 int SetEnemyMelee(XMFLOAT3 pos)
 {
 	// 戻り値の初期化

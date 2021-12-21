@@ -20,7 +20,7 @@
 #include "smoke.h"
 #include "meshwall.h"
 #include "polyline.h"
-#include "billboard.h"
+//#include "billboard.h"
 #include "Wall.h"
 #include "EnemyMelee.h"
 #include "pause.h"
@@ -454,9 +454,9 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	if (FAILED(hr))
 		return hr;
 
-	hr = InitBillboard();
+	/*hr = InitBillboard();
 	if (FAILED(hr))
-		return hr;
+		return hr;*/
 
 	// 壁初期化
 	hr = InitMeshWall();
@@ -507,18 +507,18 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 
 	hr = InitWall();
 	SetWall(XMFLOAT3(0.0f, 50.0f, 150.0f));
-	/*SetWall(XMFLOAT3(100.0f, 50.0f, 150.0f));
+	SetWall(XMFLOAT3(100.0f, 50.0f, 150.0f));
 	SetWall(XMFLOAT3(-100.0f, 50.0f, 150.0f));
-	SetWall(XMFLOAT3(200.0f, 50.0f, 150.0f));
-	SetWall(XMFLOAT3(-200.0f, 50.0f, 150.0f));*/
+	//SetWall(XMFLOAT3(200.0f, 50.0f, 150.0f));
+	//SetWall(XMFLOAT3(-200.0f, 50.0f, 150.0f));
 	
 	if (FAILED(hr))
 	return hr;
 
 	hr = InitEnemyMelee();
 	SetEnemyMelee(XMFLOAT3(0.0f, 40.0f, 0.0f));
-	SetEnemyMelee(XMFLOAT3(-200.0f, 40.0f, 0.0f));
-	SetEnemyMelee(XMFLOAT3(200.0f, 40.0f, 0.0f));
+	//SetEnemyMelee(XMFLOAT3(-200.0f, 40.0f, 0.0f));
+	//SetEnemyMelee(XMFLOAT3(200.0f, 40.0f, 0.0f));
 	
 	if (FAILED(hr))
 		return hr;
@@ -527,7 +527,6 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	g_bPause = false;
 	if (FAILED(hr))
 	return hr;
-	
 
 }
 
@@ -564,7 +563,7 @@ void Uninit(void)
 	// 壁終了処理
 	UninitMeshWall();
 
-	UninitBillboard();
+	//UninitBillboard();
 
 	// 煙終了処理
 	UninitSmoke();
@@ -685,7 +684,7 @@ void Update(void)
 		// 煙更新
 		UpdateSmoke();
 
-		UpdateBillboard();
+		//UpdateBillboard();
 
 		// ポリライン更新
 		for (int i = 0; i < MAX_POLYLINE; ++i) {
@@ -785,7 +784,7 @@ void Draw(void)
 	// 爆発描画
 	DrawExplosion();
 
-	DrawBillboard();
+	//DrawBillboard();
 
 	// ポリライン描画
 	/*for (int i = 0; i < MAX_POLYLINE; ++i) {

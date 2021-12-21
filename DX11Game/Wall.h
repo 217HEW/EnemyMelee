@@ -35,15 +35,6 @@ int SetWall(XMFLOAT3 pos);
 bool CollisionWall(XMFLOAT3 Apos, XMFLOAT3 Asize, XMFLOAT3 Bpos, XMFLOAT3 Bsize);
 
 
-
 TWall* GetWall();
-
-
-XMFLOAT3 GetPosWall(int i);
-XMFLOAT3 GetSizeWall(int i);
-
-
-XMFLOAT3 GetWallPos();
-XMFLOAT3 GetWallSize();
 
 

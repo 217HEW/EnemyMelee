@@ -14,7 +14,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+//#define MODEL_WALL			"data/model/Block3.fbx"
 #define MODEL_WALL			"data/model/wall002.X"
+
 
 #define MAX_LIFE			(2)			// 壁耐久置
 #define MAX_WALL			(256)		// 壁最大数
@@ -37,8 +39,9 @@ HRESULT InitWall(void)
 
 	for (int i = 0; i < MAX_WALL; ++i)
 	{
-		g_wall[i].m_size = XMFLOAT3(42.0f, 42.0f, 42.0f);
+		g_wall[i].m_size = XMFLOAT3(35.0f, 35.0f, 35.0f);
 		//g_wall->m_pos = XMFLOAT3(0.0f, 50.0f, 150.0f);
+		g_wall[i].m_rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_wall[i].m_nLife = MAX_LIFE;
 		g_wall[i].use = false;
 
@@ -172,31 +175,6 @@ TWall* GetWall()
 {
 	return g_wall;
 }
-
-// 壁位置取得
-//XMFLOAT3 GetPosWall(int i)
-//{
-//	return g_wall[i].m_pos;
-//}
-//
-//// 壁サイズ取得
-//XMFLOAT3 GetSizeWall(int i)
-//{
-//	return g_wall[i].m_size;
-//}
-
-
-// 壁位置取得
-//XMFLOAT3 GetWallPos()
-//{
-//	return g_wall->m_pos;
-//}
-//
-//// 壁サイズ取得
-//XMFLOAT3 GetWallSize()
-//{
-//	return g_wall->m_size;
-//}
 
 //=============================================================================
 // 衝突判定
